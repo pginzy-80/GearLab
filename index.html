@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="GearLab is a student-built gear ratio calculator and transmission design tool." />
+  <title>GearLab | Gear Ratio Design Tool</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="GearLab home">
+      <span class="brand-mark">G</span>
+      <span>Gear<span class="accent">Lab</span><small>MECHANICAL DESIGN TOOLKIT</small></span>
+    </a>
+    <nav><a href="#calculator">Calculator</a><a href="#optimizer">Gear finder</a><a href="#saved">Compare designs</a></nav>
+    <span class="status"><i></i> ENGINEERING WORKSPACE</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow"><span></span> TRANSMISSION DESIGN · VERSION 1.0</div>
+      <h1>Turn rotation into<br /><span class="gradient-text">better decisions.</span></h1>
+      <p class="hero-copy">Explore how gear selection changes rotational speed and torque. Calculate a transmission, find a gear pair for your target, and compare design options.</p>
+      <div class="hero-tags"><span>⚙ Gear ratios</span><span>↻ Output speed</span><span>⇧ Torque estimates</span></div>
+      <div class="gear-art" aria-hidden="true">
+        <svg viewBox="0 0 440 240" role="img">
+          <defs><linearGradient id="metal" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#60d8d0"/><stop offset="1" stop-color="#247e88"/></linearGradient><linearGradient id="metal2" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#b2a5ff"/><stop offset="1" stop-color="#6554bf"/></linearGradient></defs>
+          <g transform="translate(148 120)">
+            <circle r="82" fill="none" stroke="#60d8d0" stroke-opacity=".2" stroke-dasharray="4 7"/>
+            <g id="largeGear" fill="url(#metal)" stroke="#9bf4ed" stroke-width="1.2">
+              <path id="gearPathLarge"></path>
+            </g>
+            <circle r="43" fill="#101e2c" stroke="#60d8d0" stroke-width="3"/><circle r="13" fill="#60d8d0"/><circle r="5" fill="#101e2c"/>
+            <path d="M-31 0H31M0-31V31" stroke="#60d8d0" stroke-opacity=".6"/>
+          </g>
+          <g transform="translate(292 120)">
+            <circle r="52" fill="none" stroke="#b2a5ff" stroke-opacity=".2" stroke-dasharray="4 7"/>
+            <g fill="url(#metal2)" stroke="#d3ccff" stroke-width="1.1"><path id="gearPathSmall"></path></g>
+            <circle r="27" fill="#101e2c" stroke="#b2a5ff" stroke-width="3"/><circle r="9" fill="#b2a5ff"/><circle r="4" fill="#101e2c"/>
+          </g>
+          <path d="M42 218H398" stroke="#7b92a8" stroke-opacity=".35"/>
+          <text x="148" y="226" fill="#8fe9e1" text-anchor="middle" font-size="10" letter-spacing="2">DRIVER</text>
+          <text x="292" y="226" fill="#c7bcff" text-anchor="middle" font-size="10" letter-spacing="2">DRIVEN</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Current calculation summary">
+      <article class="metric-card"><span class="metric-label">GEAR RATIO</span><strong id="metricRatio">3.00:1</strong><small>Driven ÷ driver teeth</small></article>
+      <article class="metric-card"><span class="metric-label">OUTPUT SPEED</span><strong id="metricRpm">1,000 <em>RPM</em></strong><small id="speedChange">Speed reduction</small></article>
+      <article class="metric-card"><span class="metric-label">OUTPUT TORQUE</span><strong id="metricTorque">5.70 <em>N·m</em></strong><small>Estimated, at selected efficiency</small></article>
+      <article class="metric-card"><span class="metric-label">EFFICIENCY INPUT</span><strong id="metricEfficiency">95<em>%</em></strong><small>Assumption for this estimate</small></article>
+    </section>
+
+    <section class="workspace" id="calculator">
+      <div class="section-heading"><div><span class="section-index">01 / CALCULATE</span><h2>Transmission calculator</h2><p>Change the inputs to see how one gear pair affects the output.</p></div><span class="live-pill"><i></i> LIVE RESULTS</span></div>
+      <div class="two-col">
+        <article class="panel">
+          <div class="panel-heading"><div><span class="panel-icon">⚙</span><h3>Input parameters</h3></div><button class="text-button" id="resetBtn" type="button">Reset defaults ↺</button></div>
+          <form id="calcForm">
+            <div class="input-grid">
+              <label>Driver gear teeth <span class="hint" title="The gear connected to the input shaft.">ⓘ</span><input id="driverTeeth" type="number" min="1" max="200" step="1" value="12" required /><small>Input gear · teeth</small></label>
+              <label>Driven gear teeth <span class="hint" title="The gear connected to the output shaft.">ⓘ</span><input id="drivenTeeth" type="number" min="1" max="200" step="1" value="36" required /><small>Output gear · teeth</small></label>
+              <label>Input speed <span class="unit">RPM</span><input id="inputRpm" type="number" min="0" max="100000" step="any" value="3000" required /><small>Rotations per minute</small></label>
+              <label>Input torque <span class="unit">N·m</span><input id="inputTorque" type="number" min="0" max="100000" step="any" value="2" required /><small>Rotational force</small></label>
+            </div>
+            <div class="efficiency-row"><label for="efficiency">Assumed transmission efficiency <strong id="efficiencyValue">95%</strong></label><input id="efficiency" type="range" min="50" max="100" value="95" /><div class="range-labels"><span>50% · more losses</span><span>100% · ideal</span></div></div>
+            <p class="error" id="calcError" role="alert" aria-live="polite"></p>
+          </form>
+          <div class="formula-box"><span class="formula-title">FORMULAS USED</span><p>Ratio = driven teeth ÷ driver teeth</p><p>Output RPM = input RPM ÷ ratio</p><p>Output torque ≈ input torque × ratio × efficiency</p></div>
+        </article>
+        <article class="panel results-panel">
+          <div class="panel-heading"><div><span class="panel-icon purple">↗</span><h3>Calculated output</h3></div><span class="result-label">ESTIMATE</span></div>
+          <div class="big-result"><span>TRANSMISSION RATIO</span><strong id="ratioResult">3.00<span>:1</span></strong><p id="ratioDescription">A reduction stage: output rotates more slowly with higher torque.</p></div>
+          <div class="result-row"><div><span>Output rotational speed</span><small>Speed of driven gear</small></div><strong id="rpmResult">1,000 RPM</strong></div>
+          <div class="result-row"><div><span>Estimated output torque</span><small>After assumed losses</small></div><strong id="torqueResult">5.70 N·m</strong></div>
+          <div class="result-row"><div><span>Output / input speed</span><small>Speed ratio</small></div><strong id="speedPercent">33.3%</strong></div>
+          <div class="notice"><span>ⓘ</span><p><strong>Engineering note</strong><br />This is a simplified model for a single gear pair. It does not check tooth strength, lubrication, heat, shaft loads, or whether the gears physically fit together.</p></div>
+          <button class="primary-button full" id="saveDesignBtn" type="button">＋ Save this design to compare</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="workspace" id="optimizer">
+      <div class="section-heading"><div><span class="section-index">02 / OPTIMIZE</span><h2>Find a gear combination</h2><p>Search a set of available gear sizes for a pair close to your target speed.</p></div></div>
+      <article class="panel optimizer-panel">
+        <div class="optimizer-intro"><div class="panel-icon amber">⌕</div><div><h3>Target-speed finder</h3><p>Choose a motor speed and desired output. GearLab searches for a suitable pair from your selected tooth-count range.</p></div></div>
+        <div class="input-grid optimizer-grid">
+          <label>Motor speed <span class="unit">RPM</span><input id="targetInputRpm" type="number" min="1" max="100000" value="3000" /></label>
+          <label>Desired output speed <span class="unit">RPM</span><input id="targetOutputRpm" type="number" min="1" max="100000" value="750" /></label>
+          <label>Minimum gear teeth<input id="minTeeth" type="number" min="6" max="100" value="10" /></label>
+          <label>Maximum gear teeth<input id="maxTeeth" type="number" min="6" max="200" value="50" /></label>
+        </div>
+        <div class="optimizer-actions"><label class="check-label"><input type="checkbox" id="allowSpeedIncrease" /> Include speed-increasing combinations</label><button class="primary-button" id="findGearsBtn" type="button">Find combinations ↗</button></div>
+        <p class="error" id="optimizerError" role="alert" aria-live="polite"></p>
+        <div id="recommendationResults" class="recommendation-results"><div class="empty-state"><span>⚙</span><strong>Your gear options will appear here</strong><p>Enter your target and select “Find combinations.”</p></div></div>
+      </article>
+    </section>
+
+    <section class="workspace" id="saved">
+      <div class="section-heading"><div><span class="section-index">03 / COMPARE</span><h2>Design comparison</h2><p>Save candidate designs and compare their calculated performance.</p></div><button class="text-button" id="clearSavedBtn" type="button">Clear all</button></div>
+      <article class="panel comparison-panel">
+        <div class="table-wrap"><table><thead><tr><th>DESIGN</th><th>GEAR PAIR</th><th>RATIO</th><th>OUTPUT RPM</th><th>OUTPUT TORQUE</th><th></th></tr></thead><tbody id="savedRows"><tr><td colspan="6" class="table-empty">No saved designs yet. Calculate a setup and choose “Save this design.”</td></tr></tbody></table></div>
+        <p class="table-note">Saved designs stay in this browser during this session. This prototype does not upload or store your data on a server.</p>
+      </article>
+    </section>
+
+    <section class="learning-strip">
+      <div class="learning-icon">✳</div><div><span class="section-index">THE ENGINEERING BEHIND IT</span><h2>Speed and torque trade places.</h2><p>A reduction gear pair trades rotational speed for torque. For an ideal system, power is conserved; real systems lose some power through friction and other effects. GearLab uses an efficiency estimate to represent those losses.</p></div>
+    </section>
+    <footer><a class="brand footer-brand" href="#"><span class="brand-mark">G</span><span>Gear<span class="accent">Lab</span><small>MECHANICAL DESIGN TOOLKIT</small></span></a><p>Educational project · Simplified calculations · Verify designs before real-world use</p><span>GEARLAB / V1.0</span></footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
